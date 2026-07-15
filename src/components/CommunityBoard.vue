@@ -30,7 +30,9 @@ const emit = defineEmits([
   'back-list',
   'edit-post',
   'delete-post',
-  'update-field'
+  'update-field',
+  'toggle-like',
+  'toggle-bookmark'
 ])
 </script>
 
@@ -61,6 +63,8 @@ const emit = defineEmits([
     <p class="meta">{{ selectedPost.createdAt }} · 조회수 {{ selectedPost.views || 0 }}</p>
     <p>{{ selectedPost.content }}</p>
     <div class="actions">
+        <button class="icon-btn" @click.stop="emit('toggle-like', selectedPost.id)">❤️ {{ selectedPost.likes || 0 }}</button>
+      <button class="icon-btn" @click.stop="emit('toggle-bookmark', selectedPost.id)">🔖 {{ selectedPost.bookmarks || 0 }}</button>
       <button class="primary-btn" @click="emit('edit-post', selectedPost)">수정</button>
       <button class="ghost-btn" @click="emit('delete-post', selectedPost.id)">삭제</button>
       <button class="ghost-btn" @click="emit('back-list')">목록</button>
@@ -73,7 +77,11 @@ const emit = defineEmits([
         <strong>{{ post.title }}</strong>
         <p>{{ post.content }}</p>
       </div>
-      <span>{{ post.createdAt }} · 조회수 {{ post.views || 0 }}</span>
+      <span>
+          <button class="icon-btn" @click.stop="emit('toggle-like', post.id)">❤️ {{ post.likes || 0 }}</button>
+          <button class="icon-btn" @click.stop="emit('toggle-bookmark', post.id)">🔖 {{ post.bookmarks || 0 }}</button>
+        {{ post.createdAt }} · 조회수 {{ post.views || 0 }}
+      </span>
     </li>
   </ul>
 </template>
@@ -157,6 +165,15 @@ textarea {
 .post-item p {
   margin: 4px 0 0;
   color: #647382;
+  font-size: 0.95rem;
+}
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #54707f;
+  margin-right: 6px;
   font-size: 0.95rem;
 }
 

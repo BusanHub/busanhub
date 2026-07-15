@@ -67,9 +67,13 @@ function loadPosts() {
   try {
     const saved = localStorage.getItem('localhub-posts')
     const raw = saved ? JSON.parse(saved) : []
-    // ensure posts have views field
+    // ensure posts have views, likes and bookmark fields
     posts.value = raw.map((p) => ({
       views: p.views || 0,
+      likes: p.likes || 0,
+      liked: p.liked || false,
+      bookmarks: p.bookmarks || 0,
+      bookmarked: p.bookmarked || false,
       ...p
     }))
   } catch {
@@ -158,6 +162,10 @@ function submitPost() {
       content: form.value.content.trim(),
       password: form.value.password.trim(),
       views: 0,
+      likes: 0,
+      liked: false,
+      bookmarks: 0,
+      bookmarked: false,
       createdAt: new Date().toLocaleString('ko-KR'),
       updatedAt: null
     })
@@ -211,6 +219,30 @@ function deletePost(postId) {
 
 function updateFormField(field, value) {
   form.value[field] = value
+}
+
+function toggleLike(postId) {
+  const post = posts.value.find((p) => p.id === postId)
+  if (!post) return
+  if (post.liked) {
+    post.likes = Math.max(0, (post.likes || 0) - 1)
+    post.liked = false
+  } else {
+    post.likes = (post.likes || 0) + 1
+    post.liked = true
+  }
+}
+
+function toggleBookmark(postId) {
+  const post = posts.value.find((p) => p.id === postId)
+  if (!post) return
+  if (post.bookmarked) {
+    post.bookmarks = Math.max(0, (post.bookmarks || 0) - 1)
+    post.bookmarked = false
+  } else {
+    post.bookmarks = (post.bookmarks || 0) + 1
+    post.bookmarked = true
+  }
 }
 
 watch(posts, savePosts, { deep: true })
@@ -343,7 +375,9 @@ function fallbackReply(text) {
           @back-list="backToList"
           @edit-post="editPost"
           @delete-post="deletePost"
-          @update-field="updateFormField"
+            @update-field="updateFormField"
+            @toggle-like="toggleLike"
+            @toggle-bookmark="toggleBookmark"
         />
       </section>
     </main>
