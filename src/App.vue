@@ -66,7 +66,12 @@ const selectedPost = computed(() =>
 function loadPosts() {
   try {
     const saved = localStorage.getItem('localhub-posts')
-    posts.value = saved ? JSON.parse(saved) : []
+    const raw = saved ? JSON.parse(saved) : []
+    // ensure posts have views field
+    posts.value = raw.map((p) => ({
+      views: p.views || 0,
+      ...p
+    }))
   } catch {
     posts.value = []
   }
@@ -152,6 +157,7 @@ function submitPost() {
       title: form.value.title.trim(),
       content: form.value.content.trim(),
       password: form.value.password.trim(),
+      views: 0,
       createdAt: new Date().toLocaleString('ko-KR'),
       updatedAt: null
     })
@@ -163,6 +169,10 @@ function submitPost() {
 }
 
 function openPost(post) {
+  const idx = posts.value.findIndex((p) => p.id === post.id)
+  if (idx !== -1) {
+    posts.value[idx].views = (posts.value[idx].views || 0) + 1
+  }
   selectedPostId.value = post.id
   boardMode.value = 'detail'
 }

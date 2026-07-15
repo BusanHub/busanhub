@@ -58,7 +58,7 @@ const emit = defineEmits([
 
   <div v-else-if="boardMode === 'detail' && selectedPost" class="detail-box">
     <h3>{{ selectedPost.title }}</h3>
-    <p class="meta">{{ selectedPost.createdAt }}</p>
+    <p class="meta">{{ selectedPost.createdAt }} · 조회수 {{ selectedPost.views || 0 }}</p>
     <p>{{ selectedPost.content }}</p>
     <div class="actions">
       <button class="primary-btn" @click="emit('edit-post', selectedPost)">수정</button>
@@ -73,7 +73,7 @@ const emit = defineEmits([
         <strong>{{ post.title }}</strong>
         <p>{{ post.content }}</p>
       </div>
-      <span>{{ post.createdAt }}</span>
+      <span>{{ post.createdAt }} · 조회수 {{ post.views || 0 }}</span>
     </li>
   </ul>
 </template>
