@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BusanHub - 부산의 모든 것</title>
+    <link href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/static/woff2/SUIT.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            /* 폰트를 세련된 SUIT로 변경 */
+            font-family: 'SUIT', sans-serif;
+            letter-spacing: -0.5px;
+        }
+
+        body {
+            background-color: #f4f8fb; 
+            color: #2c3e50;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ✨ 헤더 영역 중앙 정렬, 그림자 제거 및 로컬 이미지 적용 */
+        header {
+            position: relative;
+            height: 320px; 
+            /* 외부 URL 대신 로컬에 준비된 '헤더배경.jpg' 파일로 변경 적용 */
+            background: linear-gradient(135deg, rgba(8, 28, 56, 0.75) 0%, rgba(0, 120, 215, 0.45) 100%), 
+                        url('헤더배경.jpg') no-repeat center center/cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center; 
+            color: white;
+            padding: 0;
+        }
+
+        /* ✨ 텍스트 중앙 정렬 */
+        .header-title-box {
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 3.2rem; 
+            font-weight: 800;
+            margin-bottom: 10px;
+            /* ✨ 그림자 효과(text-shadow) 없음 */
+            text-shadow: none; 
+        }
+
+        header p {
+            font-size: 1.15rem;
+            font-weight: 400;
+            opacity: 0.95;
+            letter-spacing: 0.5px;
+            /* ✨ 그림자 효과(text-shadow) 없음 */
+            text-shadow: none; 
+        }
+
+        main {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
+
+        section {
+            margin-bottom: 90px;
+        }
+
+        /* ✨ 섹션 타이틀 중앙 정렬 및 상하 구조 개선 */
+        .section-title-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-bottom: 45px;
+        }
+
+        /* 위에 배치되는 아이콘 */
+        .section-title-box i {
+            font-size: 2.2rem; 
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #00a8ff, #00d2fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 6px rgba(0, 168, 255, 0.2));
+            display: inline-block;
+        }
+
+        /* 밑에 배치되는 제목 */
+        .section-title-box h2 {
+            font-size: 2.1rem; 
+            font-weight: 800; 
+            color: #1e272e; 
+        }
+
+        /* -------------------------------------------
+           ✨ 슬라이더 UI (4열 배치 및 무한 루프)
+        ------------------------------------------- */
+        .slider-relative-wrapper {
+            position: relative;
+            width: 100%;
+            padding: 10px 0;
+        }
+
+        .slider-overflow-container {
+            overflow: hidden;
+            width: 100%;
+            border-radius: 20px;
+            padding: 15px 5px; 
+            margin: -15px -5px;
+        }
+
+        .slider-track {
+            display: flex;
+            gap: 20px; 
+            width: 100%;
+        }
+
+        .card {
+            width: calc(25% - 15px); 
+            flex-shrink: 0;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 12px 24px rgba(0, 40, 100, 0.09), 0 4px 8px rgba(0, 0, 0, 0.04); 
+            border: 1px solid rgba(0, 168, 255, 0.08);
+            transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), 
+                        box-shadow 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+                        border-color 0.45s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .card-img-wrap {
+            width: 100%;
+            height: 210px; 
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .card:hover {
+            transform: translateY(-12px); 
+            box-shadow: 0 24px 45px rgba(0, 132, 255, 0.22), 0 8px 18px rgba(0, 0, 0, 0.06); 
+            border-color: rgba(0, 168, 255, 0.4);
+        }
+
+        .card:hover img {
+            transform: scale(1.06);
+        }
+
+        .card-body {
+            padding: 24px;
+            background: white;
+        }
+
+        .card-body h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #1e272e;
+            transition: color 0.3s ease;
+        }
+
+        .card:hover .card-body h3 {
+            color: #00a8ff;
+        }
+
+        .card-body p {
+            font-size: 0.92rem;
+            color: #64748b;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .slide-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 54px;
+            height: 54px;
+            background: #ffffff; 
+            border: 1px solid #dcdde1;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            color: #2c3e50;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 10px 25px rgba(0, 40, 100, 0.18), 0 4px 10px rgba(0, 0, 0, 0.08); 
+        }
+
+        .slide-nav-btn:hover {
+            background: #00a8ff;
+            color: white;
+            box-shadow: 0 12px 28px rgba(0, 168, 255, 0.4), 0 4px 10px rgba(0, 168, 255, 0.2);
+            border-color: transparent;
+            transform: translateY(-50%) scale(1.05); 
+        }
+
+        .slide-nav-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .slide-nav-btn.prev { left: -27px; }
+        .slide-nav-btn.next { right: -27px; }
+
+        @media (max-width: 1024px) {
+            .card { width: calc(50% - 10px); }
+        }
+        @media (max-width: 600px) {
+            .card { width: 100%; }
+            .slide-nav-btn.prev { left: -10px; }
+            .slide-nav-btn.next { right: -10px; }
+        }
+
+        /* -------------------------------------------
+           소통마당 
+        ------------------------------------------- */
+        .board-header-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .board-link-btn {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #00a8ff, #00d2fc);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            font-size: 1.15rem;
+            transition: transform 0.4s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 168, 255, 0.3);
+        }
+
+        .board-link-btn:hover {
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 6px 18px rgba(0, 168, 255, 0.45);
+        }
+
+        .board-preview-box {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 40, 100, 0.04);
+            border: 1px solid rgba(0, 168, 255, 0.05);
+        }
+
+        .preview-list {
+            list-style: none;
+        }
+
+        .post-item {
+            padding: 24px 18px; 
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06); 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 12px;
+            transition: transform 0.3s ease, background-color 0.3s ease, padding-left 0.3s ease;
+        }
+
+        .post-item:last-child {
+            border-bottom: none; 
+        }
+
+        .post-item:hover {
+            background-color: #f1f9ff;
+            padding-left: 26px;
+            transform: translateX(4px);
+        }
+
+        .post-info h4 {
+            font-size: 1.32rem; 
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-weight: 700;
+            transition: color 0.2s;
+        }
+
+        .post-item:hover .post-info h4 {
+            color: #00a8ff;
+        }
+
+        .post-info p {
+            font-size: 1.1rem; 
+            color: #7f8c8d;
+        }
+
+        .post-meta {
+            font-size: 1.02rem; 
+            color: #a4b0be;
+            text-align: right;
+            min-width: 140px; 
+        }
+
+        /* -------------------------------------------
+           ✨ 챗봇 스타일 (플로팅 버튼 크기 대폭 확대 및 시인성 개선)
+        ------------------------------------------- */
+        .chatbot-btn {
+            position: fixed;
+            bottom: 35px;
+            right: 35px;
+            /* ✨ 버튼 크기 확대 (기존 60px -> 72px) */
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #00a8ff, #00d2fc);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* ✨ 아이콘 크기 확대 (기존 1.6rem -> 1.9rem) */
+            font-size: 1.9rem;
+            cursor: pointer;
+            /* 그림자 강조 */
+            box-shadow: 0 8px 26px rgba(0, 168, 255, 0.4), 0 4px 10px rgba(0, 0, 0, 0.08);
+            z-index: 1000;
+            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s ease;
+        }
+
+        .chatbot-btn:hover {
+            /* ✨ 오버 반응 효과 극대화 */
+            transform: scale(1.12) translateY(-8px);
+            box-shadow: 0 14px 32px rgba(0, 168, 255, 0.48), 0 6px 14px rgba(0, 0, 0, 0.1);
+        }
+
+        .chatbot-window {
+            position: fixed;
+            bottom: 120px; /* 버튼이 커짐에 따라 위로 살짝 이동 */
+            right: 35px;
+            width: 360px;
+            height: 460px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 12px 40px rgba(0,168,255,0.18);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1000;
+            border: 1px solid rgba(0, 168, 255, 0.15);
+        }
+
+        .chatbot-header {
+            background: linear-gradient(90deg, #00a8ff, #00d2fc);
+            color: white;
+            padding: 16px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-close {
+            cursor: pointer;
+            font-size: 1.3rem;
+            transition: opacity 0.2s;
+        }
+        .chatbot-close:hover { opacity: 0.7; }
+
+        .chatbot-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #f4f8fb;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-msg {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+        }
+
+        .chat-msg.bot { background-color: white; color: #2c3e50; align-self: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+        .chat-msg.user { background-color: #00a8ff; color: white; align-self: flex-end; }
+
+        .chatbot-input-area {
+            display: flex;
+            border-top: 1px solid #edf4f9;
+            padding: 12px;
+            background: white;
+        }
+
+        .chatbot-input-area input {
+            flex: 1;
+            border: 1px solid #ced4da;
+            padding: 10px 12px;
+            border-radius: 8px;
+            outline: none;
+            font-size: 0.95rem;
+        }
+        .chatbot-input-area input:focus {
+            border-color: #00a8ff;
+        }
+
+        .chatbot-input-area button {
+            background: #00a8ff;
+            color: white;
+            border: none;
+            padding: 0 16px;
+            margin-left: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .chatbot-input-area button:hover { background: #0086cc; }
+
+        /* 모달창 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(10, 30, 50, 0.55); 
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            max-width: 580px;
+            width: 100%;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,110,255,0.25);
+            position: relative;
+            border: 1px solid rgba(0, 168, 255, 0.15);
+        }
+
+        .modal-img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+        }
+
+        .modal-body { padding: 35px; }
+        .modal-body h3 { font-size: 1.6rem; margin-bottom: 14px; color: #00a8ff; font-weight: 700; }
+        .modal-body p { color: #57606f; line-height: 1.8; font-size: 1rem; }
+        .modal-close {
+            position: absolute;
+            top: 15px; right: 20px;
+            font-size: 2.5rem; color: white;
+            cursor: pointer; text-shadow: 1px 1px 6px rgba(0,0,0,0.6);
+            transition: transform 0.2s;
+            z-index: 10;
+        }
+        .modal-close:hover { transform: scale(1.1); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title-box">
+            <h1>BusanHub</h1>
+            <p>푸른 동해와 뜨거운 열정의 도시, 부산</p>
+        </div>
+    </header>
+
+    <main>
+        <section style="position: relative;">
+            <div class="section-title-box">
+                <i class="fa-regular fa-lightbulb"></i>
+                <h2>지금 뜨는 관광명소</h2>
+            </div>
+            
+            <div class="slider-relative-wrapper">
+                <button class="slide-nav-btn prev" onclick="moveSlide(-1)">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button class="slide-nav-btn next" onclick="moveSlide(1)">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+
+                <div class="slider-overflow-container">
+                    <div class="slider-track" id="sliderTrack">
+                        <div class="card" onclick="openModal('해운대 해수욕장', '해운대 해수욕장.jpg', '부산의 대표적인 랜드마크로 이국적인 고층 빌딩 숲과 시원한 백사장이 끝없이 이어지는 최고 명소입니다.')">
+                            <div class="card-img-wrap"><img src="해운대 해수욕장.jpg" alt="해운대"></div>
+                            <div class="card-body"><h3>해운대 해수욕장</h3><p>이국적인 빌딩 숲과 시원한 백사장이 어우러진 최고 해변</p></div>
+                        </div>
+                        <div class="card" onclick="openModal('광안리 해수욕장', '광안리 해수욕장.jpg', '바다를 가로지르는 광안대교의 야경과 아름다운 해변, 멋진 카페가 모여있는 감성 가득한 밤바다의 성지입니다.')">
+                            <div class="card-img-wrap"><img src="광안리 해수욕장.jpg" alt="광안리"></div>
+                            <div class="card-body"><h3>광안리 해수욕장</h3><p>광안대교 뷰와 다채로운 주말 문화 행사가 빛나는 대표 야경 명소</p></div>
+                        </div>
+                        <div class="card" onclick="openModal('감천문화마을', '감천문화마을.jpg', '한국의 마추픽추라 불리는 감성 마을로, 파스텔 톤의 알록달록한 계단식 주택과 어린왕자 포토존이 유명합니다.')">
+                            <div class="card-img-wrap"><img src="감천문화마을.jpg" alt="감천"></div>
+                            <div class="card-body"><h3>감천문화마을</h3><p>알록달록 파스텔 빛의 골목들과 귀여운 어린 왕자 동상이 있는 예술 마을</p></div>
+                        </div>
+                        <div class="card" onclick="openModal('해동용궁사', '해동용궁사.jpg', '파도 소리가 들리는 해안 기암절벽 바로 위에 지어진 독특하고 영엄한 사찰로, 한 가지 소원은 꼭 들어준다고 전해집니다.')">
+                            <div class="card-img-wrap"><img src="해동용궁사.jpg" alt="용궁사"></div>
+                            <div class="card-body"><h3>해동용궁사</h3><p>동해 기암절벽 위에서 바다를 정면으로 바라보고 선 독특한 해안 사찰</p></div>
+                        </div>
+                        <div class="card" onclick="openModal('해운대 블루라인파크', '해운대 블루라인파크.jpg', '옛 동해남부선 철길을 달리는 알록달록한 공중 스카이캡슐 및 해변열차에서 부산 해안선을 환상적으로 바라볼 수 있습니다.')">
+                            <div class="card-img-wrap"><img src="해운대 블루라인파크.jpg" alt="블루라인"></div>
+                            <div class="card-body"><h3>해운대 블루라인파크</h3><p>스카이캡슐과 해변 열차를 타고 즐기는 최고의 해안선 풍경 열차</p></div>
+                        </div>
+                        <div class="card" onclick="openModal('영도 흰여울문화마을', '영도 흰여울문화마을.jpg', '절벽 끝자락을 따라 펼쳐진 푸른 바다를 내려다보며 걷는, 아기자기하고 투명한 감성의 골목 산책로입니다.')">
+                            <div class="card-img-wrap"><img src="영도 흰여울문화마을.jpg" alt="흰여울"></div>
+                            <div class="card-body"><h3>영도 흰여울문화마을</h3><p>바다 절벽길을 따라 하얗게 이어진 골목길과 영화 속 독특한 감성 명소</p></div>
+                        </div>
+                        <div class="card" onclick="openModal('태종대 유원지', '태종대 유원지.jpg', '부산을 대표하는 해안 암석 지형으로, 울창한 수림과 기암괴석이 자아내는 웅장한 대자연의 비경을 품은 명소입니다.')">
+                            <div class="card-img-wrap"><img src="태종대 유원지.jpg" alt="태종대"></div>
+                            <div class="card-body"><h3>태종대 유원지</h3><p>기암괴석과 푸른 바다가 빚어낸 웅장한 해안 절벽과 전망대</p></div>
+                        </div>
+                        <div class="card" onclick="openModal('송도 구름산책로', '송도 구름산책로.jpg', '바다 위를 걷는 듯한 짜릿함을 선사하는 국내 최장 해상 산책로로, 밤바다 위를 가로지르는 해상 케이블카 뷰가 일품입니다.')">
+                            <div class="card-img-wrap"><img src="송도 구름산책로.jpg" alt="송도"></div>
+                            <div class="card-body"><h3>송도 구름산책로</h3><p>투명한 바다 위를 가로지르는 아찔하고 로맨틱한 곡선형 해상 산책길</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="board-header-container">
+                <div class="section-title-box">
+                    <i class="fa-regular fa-comments"></i>
+                    <h2>소통마당</h2>
+                </div>
+                <a href="board.html" class="board-link-btn" title="전체 게시판 보기">
+                    <i class="fa-solid fa-plus"></i>
+                </a>
+            </div>
+            
+            <div class="board-preview-box">
+                <ul class="preview-list">
+                    <li class="post-item">
+                        <div class="post-info">
+                            <h4>광안리 수변공원 밤에 돗자리 펴기 어떤가요?</h4>
+                            <p>선선하게 밤바람 쐬면서 회 한 접시 하려고 하는데, 밤에는 많이 추운지 궁금해요!</p>
+                        </div>
+                        <div class="post-meta">
+                            <div><strong>부산갈매기</strong></div>
+                            <div>방금 전</div>
+                        </div>
+                    </li>
+                    <li class="post-item">
+                        <div class="post-info">
+                            <h4>해운대 근처 현지인이 추천하는 국밥 맛집 공유</h4>
+                            <p>골목길 안쪽에 숨어있는 곳인데 고기 가득 넣어주고 국물이 정말 깔끔합니다.</p>
+                        </div>
+                        <div class="post-meta">
+                            <div><strong>국밥매니아</strong></div>
+                            <div>30분 전</div>
+                        </div>
+                    </li>
+                    <li class="post-item">
+                        <div class="post-info">
+                            <h4>이번 주말에 흰여울문화마을 같이 걸으실 동네 주민!</h4>
+                            <p>날씨도 좋은데 가볍게 바다 구경하면서 산책하고 커피 한 잔 같이 마셔요~</p>
+                        </div>
+                        <div class="post-meta">
+                            <div><strong>산책러브</strong></div>
+                            <div>2시간 전</div>
+                        </div>
+                    </li>
+                    <li class="post-item">
+                        <div class="post-info">
+                            <h4>영도 봉래산 정상 다녀왔습니다. 가슴이 뻥 뚫리네요!</h4>
+                            <p>초보자도 올라가기 쉽고 정상에서 바라보는 부산항대교 뷰가 기가 막힙니다.</p>
+                        </div>
+                        <div class="post-meta">
+                            <div><strong>영도초보등산</strong></div>
+                            <div>어제</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <div class="chatbot-btn" onclick="toggleChatbot()">
+        <i class="fa-solid fa-comments"></i>
+    </div>
+
+    <div class="chatbot-window" id="chatbotWindow">
+        <div class="chatbot-header">
+            <span><i class="fa-solid fa-robot"></i> BusanHub 도우미</span>
+            <span class="chatbot-close" onclick="toggleChatbot()">&times;</span>
+        </div>
+        <div class="chatbot-messages" id="chatMessages">
+            <div class="chat-msg bot">안녕하세요! 부산 여행 도우미 챗봇입니다. 궁금한 장소가 있다면 적어주세요! (예: 해운대, 광안리)</div>
+        </div>
+        <div class="chatbot-input-area">
+            <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+            <button onclick="sendChatMessage()">전송</button>
+        </div>
+    </div>
+
+    <div class="modal" id="tourModal">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <div class="modal-content">
+            <img id="modalImg" src="" alt="관광지" class="modal-img">
+            <div class="modal-body">
+                <h3>관광지 안내</h3>
+                <p id="modalDesc">상세 설명</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 무한 루프형 슬라이더 스크립트
+        const track = document.getElementById('sliderTrack');
+        const cards = document.querySelectorAll('.slider-track .card');
+        const originalCount = cards.length;
+        const cardsPerView = 4;
+
+        for (let i = 0; i < cardsPerView; i++) {
+            const cloneFirst = cards[i].cloneNode(true);
+            track.appendChild(cloneFirst);
+        }
+        for (let i = originalCount - cardsPerView; i < originalCount; i++) {
+            const cloneLast = cards[i].cloneNode(true);
+            track.insertBefore(cloneLast, track.firstChild);
+        }
+
+        let currentVirtualPageIndex = 1;
+        const totalVirtualPages = Math.ceil(track.children.length / cardsPerView);
+        
+        track.style.transition = 'none';
+        track.style.transform = `translateX(-${currentVirtualPageIndex * 100}%)`;
+
+        let isTransitioning = false;
+
+        function moveSlide(direction) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+
+            currentVirtualPageIndex += direction;
+            track.style.transition = 'transform 0.75s cubic-bezier(0.25, 1, 0.3, 1)';
+            track.style.transform = `translateX(-${currentVirtualPageIndex * 100}%)`;
+        }
+
+        track.addEventListener('transitionend', () => {
+            isTransitioning = false;
+            if (currentVirtualPageIndex >= totalVirtualPages - 1) {
+                track.style.transition = 'none';
+                currentVirtualPageIndex = 1;
+                track.style.transform = `translateX(-${currentVirtualPageIndex * 100}%)`;
+            }
+            if (currentVirtualPageIndex <= 0) {
+                track.style.transition = 'none';
+                currentVirtualPageIndex = totalVirtualPages - 2;
+                track.style.transform = `translateX(-${currentVirtualPageIndex * 100}%)`;
+            }
+        });
+
+        function openModal(title, imgSrc, desc) {
+            document.querySelector('.modal-body h3').innerText = title;
+            document.getElementById('modalImg').src = imgSrc;
+            document.getElementById('modalDesc').innerText = desc;
+            document.getElementById('tourModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('tourModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('tourModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function toggleChatbot() {
+            const chatWindow = document.getElementById('chatbotWindow');
+            chatWindow.style.display = (chatWindow.style.display === 'none' || chatWindow.style.display === '') ? 'flex' : 'none';
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const messageText = input.value.trim();
+            if (messageText === "") return;
+
+            appendMessage(messageText, 'user');
+            input.value = "";
+
+            setTimeout(() => {
+                let reply = "죄송해요, 아직 학습하지 못한 단어예요! '해운대', '광안리', '감천' 등을 입력해 주세요.";
+                if (messageText.includes("해운대")) reply = "🌊 해운대는 역시 밤바다와 화려한 고층 빌딩 야경이 최고입니다!";
+                else if (messageText.includes("광안리")) reply = "🌉 광안대교 뷰를 보며 해변 카페거리에서 낭만을 만끽해 보세요!";
+                else if (messageText.includes("감천")) reply = "🏡 감천문화마을의 파스텔톤 계단 골목길과 어린왕자 포토존을 추천해요.";
+                
+                appendMessage(reply, 'bot');
+            }, 500);
+        }
+
+        function appendMessage(text, sender) {
+            const chatMessages = document.getElementById('chatMessages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-msg ${sender}`;
+            msgDiv.innerText = text;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html>

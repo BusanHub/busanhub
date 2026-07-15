@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BusanHub - 소통마당 게시판</title>
+    <link href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/static/woff2/SUIT.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'SUIT', sans-serif;
+            letter-spacing: -0.5px;
+        }
+
+        body {
+            background-color: #f4f8fb; 
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        /* 내비게이션 바 (헤더 비주얼 대신 간결한 상단 바 배치) */
+        .nav-bar {
+            background: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 좌상단 메인 로고 스타일 (클릭 시 index.html로 이동 가능) */
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #00a8ff;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .nav-logo:hover {
+            opacity: 0.8;
+        }
+
+        .nav-back-btn {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+
+        .nav-back-btn:hover {
+            color: #00a8ff;
+        }
+
+        /* 메인 컨테이너 */
+        main {
+            max-width: 1100px;
+            margin: 40px auto 80px auto;
+            padding: 0 20px;
+        }
+
+        /* 소통마당 제목 */
+        .board-title-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .board-title-box i {
+            font-size: 2.1rem; 
+            background: linear-gradient(135deg, #00a8ff, #00d2fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .board-title-box h2 {
+            font-size: 2.1rem; 
+            font-weight: 800;
+            color: #1e272e;
+        }
+
+        /* 검색 및 컨트롤 영역 */
+        .board-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+            min-width: 280px;
+        }
+
+        /* ✨ 입체감과 그라데이션 느낌을 주는 모든 그림자(box-shadow) 제거 */
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 45px;
+            border: 1px solid #dcdde1; /* 깔끔하고 플랫한 단색 회색 테두리 */
+            border-radius: 30px;
+            font-size: 0.95rem;
+            outline: none;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease;
+            box-shadow: none; /* 그림자 완전 제거 */
+            -webkit-appearance: none; /* 브라우저 기본 내장 그림자 제거 */
+            appearance: none;
+        }
+
+        /* ✨ 포커스 시에도 번지는 효과 없이 선 색상만 변하도록 지정 */
+        .search-box input:focus {
+            border-color: #00a8ff;
+            box-shadow: none;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a4b0be;
+        }
+
+        /* 글쓰기 버튼 */
+        .btn-write {
+            background: linear-gradient(135deg, #00a8ff, #00d2fc);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 168, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-write:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 168, 255, 0.4);
+        }
+
+        /* 게시글 목록 컨테이너 */
+        .board-list-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 40, 100, 0.05);
+            border: 1px solid rgba(0, 168, 255, 0.05);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .post-item {
+            padding: 22px 26px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s, transform 0.2s;
+            cursor: pointer;
+        }
+
+        .post-item:last-child {
+            border-bottom: none;
+        }
+
+        .post-item:hover {
+            background-color: #f8fafc;
+        }
+
+        /* 게시글 번호 영역 */
+        .post-number {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #94a3b8;
+            min-width: 65px; 
+            margin-right: 15px; 
+            text-align: left;
+        }
+
+        .post-main-content {
+            flex: 1;
+            padding-right: 20px;
+        }
+
+        /* 첨부 이미지 배지 및 타이틀 */
+        .post-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .post-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .post-item:hover .post-title {
+            color: #00a8ff;
+        }
+
+        .img-attached-badge {
+            color: #2ecc71;
+            font-size: 0.95rem;
+        }
+
+        .post-summary {
+            font-size: 0.95rem;
+            color: #64748b;
+            margin-bottom: 10px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* 태그 리스트 */
+        .tag-list {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .tag-item {
+            background-color: #edf2f7;
+            color: #4a5568;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 12px;
+        }
+
+        /* 메타 정보 */
+        .post-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .post-author {
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .post-stats {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: auto;
+        }
+
+        .stat-icon {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .stat-icon.like:hover, .stat-icon.like.active {
+            color: #ff7675;
+        }
+        .stat-icon.bookmark:hover, .stat-icon.bookmark.active {
+            color: #f1c40f;
+        }
+
+        /* 페이지네이션 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 40px;
+        }
+
+        .page-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid #dcdde1;
+            background: white;
+            color: #2c3e50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover, .page-btn.active {
+            background-color: #00a8ff;
+            color: white;
+            border-color: #00a8ff;
+        }
+
+        /* 글쓰기 모달 창 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(10, 30, 50, 0.55); 
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,110,255,0.25);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #00a8ff, #00d2fc);
+            color: white;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: white;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .modal-close:hover { opacity: 1; }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus {
+            border-color: #00a8ff;
+        }
+
+        /* 이미지 첨부 스타일 */
+        .file-upload-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            background-color: #f8fafc;
+            transition: border-color 0.2s;
+        }
+
+        .file-upload-box:hover {
+            border-color: #00a8ff;
+        }
+
+        .file-upload-box i {
+            font-size: 1.5rem;
+            color: #94a3b8;
+            margin-bottom: 6px;
+        }
+
+        .file-upload-box p {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .image-preview {
+            display: none;
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            background-color: #f8fafc;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn-cancel {
+            background-color: #e2e8f0;
+            color: #475569;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            background-color: #00a8ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-submit:hover { background-color: #0086cc; }
+
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <a href="index.html" class="nav-logo">BusanHub</a>
+        <a href="index.html" class="nav-back-btn">
+            <i class="fa-solid fa-arrow-left"></i> 메인 화면으로 돌아가기
+        </a>
+    </div>
+
+    <main>
+        <div class="board-title-box">
+            <i class="fa-regular fa-comments"></i>
+            <h2>소통마당</h2>
+        </div>
+
+        <div class="board-controls">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="boardSearchInput" placeholder="제목, 태그, 작성자 검색..." onkeyup="searchPosts()">
+            </div>
+            <button class="btn-write" onclick="openWriteModal()">
+                <i class="fa-solid fa-pen"></i> 글쓰기
+            </button>
+        </div>
+
+        <div class="board-list-container" id="boardList">
+            </div>
+
+        <div class="pagination" id="pagination">
+            </div>
+    </main>
+
+    <div class="modal" id="writeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-pen-nib"></i> 새로운 글 등록하기</h3>
+                <span class="modal-close" onclick="closeWriteModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="postTitleInput">제목</label>
+                    <input type="text" id="postTitleInput" placeholder="제목을 입력하세요.">
+                </div>
+                <div class="form-group">
+                    <label for="postAuthorInput">작성자</label>
+                    <input type="text" id="postAuthorInput" placeholder="닉네임을 입력하세요.">
+                </div>
+                <div class="form-group">
+                    <label for="postContentInput">내용</label>
+                    <textarea id="postContentInput" rows="5" placeholder="내용을 정성껏 작성해 주세요."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="postTagInput">태그 (쉼표로 구분)</label>
+                    <input type="text" id="postTagInput" placeholder="예: 맛집, 해운대, 꿀팁">
+                </div>
+                <div class="form-group">
+                    <label>이미지 첨부</label>
+                    <div class="file-upload-box" onclick="document.getElementById('imageFileInput').click()">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <p>클릭하여 이미지 업로드 (JPG, PNG)</p>
+                        <input type="file" id="imageFileInput" accept="image/*" style="display: none;" onchange="previewImage(event)">
+                        <img id="imageFilePreview" class="image-preview" src="" alt="미리보기">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeWriteModal()">취소</button>
+                <button class="btn-submit" onclick="submitNewPost()">등록하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 15개 기본 목데이터셋
+        let posts = [
+            { id: 15, title: "광안리 수변공원 밤에 돗자리 펴기 어떤가요?", summary: "선선하게 밤바람 쐬면서 회 한 접시 하려고 하는데, 밤에는 많이 추운지 궁금해요!", tags: ["광안리", "수변공원", "밤바다"], author: "부산갈매기", date: "방금 전", views: 142, likes: 24, bookmarked: false, liked: false, hasImage: true },
+            { id: 14, title: "해운대 근처 현지인이 추천하는 국밥 맛집 공유", summary: "골목길 안쪽에 숨어있는 곳인데 고기 가득 넣어주고 국물이 정말 깔끔합니다.", tags: ["해운대", "국밥맛집", "현지인"], author: "국밥매니아", date: "30분 전", views: 320, likes: 58, bookmarked: true, liked: true, hasImage: false },
+            { id: 13, title: "이번 주말에 흰여울문화마을 같이 걸으실 동네 주민!", summary: "날씨도 좋은데 가볍게 바다 구경하면서 산책하고 커피 한 잔 같이 마셔요~", tags: ["영도", "흰여울마을", "산책"], author: "산책러브", date: "2시간 전", views: 98, likes: 12, bookmarked: false, liked: false, hasImage: false },
+            { id: 12, title: "영도 봉래산 정상 다녀왔습니다. 가슴이 뻥 뚫리네요!", summary: "초보자도 올라가기 쉽고 정상에서 바라보는 부산항대교 뷰가 기가 막힙니다.", tags: ["영도", "봉래산", "등산코스"], author: "영도초보등산", date: "어제", views: 215, likes: 45, bookmarked: false, liked: false, hasImage: true },
+            { id: 11, title: "광안리 드론쇼 명당자리 꿀팁 대방출", summary: "정면에서 완벽하게 보려면 민락해변공원 방향보다는 중앙 편의점 근처가 베스트!", tags: ["광안리", "드론쇼", "꿀팁"], author: "드론매니아", date: "어제", views: 512, likes: 98, bookmarked: true, liked: false, hasImage: true },
+            { id: 10, title: "부산역 근처 만두 투어 솔직 소감", summary: "신발원과 마가만두 둘 다 다녀왔는데 육즙 터지는 만두는 역시 마가가 제 입맛에 딱!", tags: ["부산역", "차이나타운", "만두맛집"], author: "미식가투어", date: "2일 전", views: 403, likes: 37, bookmarked: false, liked: false, hasImage: false },
+            { id: 9, title: "감천문화마을 교복대여 어디가 싼가요?", summary: "인생샷 찍으러 가려는데 가격 착하고 교복 종류 많은 대여점 추천 부탁드립니다.", tags: ["감천문화마을", "교복체험", "질문"], author: "인생샷꿈나무", date: "2일 전", views: 189, likes: 9, bookmarked: false, liked: false, hasImage: false },
+            { id: 8, title: "송도 해상케이블카 크리스탈 크루즈 리얼 후기", summary: "바닥이 투명해서 스릴 만점이었어요! 노을 질 때 타시면 잊지 못할 풍경을 보게 됩니다.", tags: ["송도", "케이블카", "데이트"], author: "하늘구름", date: "3일 전", views: 334, likes: 62, bookmarked: true, liked: true, hasImage: true },
+            { id: 7, title: "자갈치시장 꼼장어 양심적인 곳 찾았어요", summary: "터무니없이 비싸게 파는 곳 많은데, 여기는 양도 진짜 많고 서비스 조개탕까지 줍니다.", tags: ["자갈치시장", "꼼장어맛집", "단골집"], author: "소주한잔", date: "3일 전", views: 504, likes: 78, bookmarked: false, liked: false, hasImage: true },
+            { id: 6, title: "해운대 블루라인파크 예약하는 요령 공유", summary: "온라인 예매 마감됐어도 현장 판매가 소량 남아있긴 하지만 주말엔 아침 일찍 가셔야 해요.", tags: ["블루라인파크", "해변열차", "예약팁"], author: "철도러버", date: "4일 전", views: 612, likes: 120, bookmarked: true, liked: false, hasImage: false },
+            { id: 5, title: "기장 끝자락 오션뷰 카페 솔직한 리뷰", summary: "뷰는 정말 화려하고 예쁜데 빵 가격이랑 음료 가격이 자비가 없네요. 자리값이라 생각합니다.", tags: ["기장카페", "오션뷰", "솔직후기"], author: "카페돌이", date: "5일 전", views: 278, likes: 19, bookmarked: false, liked: false, hasImage: true },
+            { id: 4, title: "동래 온천장 가족탕 목욕 다녀왔습니다.", summary: "온천 원수 그대로 사용하는 유서 깊은 대중탕이라 그런지 확실히 피부가 보들보들해져요.", tags: ["동래온천", "가족탕", "힐링"], author: "뽀송이", date: "5일 전", views: 154, likes: 11, bookmarked: false, liked: false, hasImage: false },
+            { id: 3, title: "센텀시티 스파랜드 할인권 정복하기", summary: "네이버 예약이나 주중 이른 아침 조조 할인을 이용하면 가성비 좋게 사우나 힐링 가능해요.", tags: ["센텀시티", "스파랜드", "할인정보"], author: "할인천사", date: "6일 전", views: 489, likes: 88, bookmarked: true, liked: false, hasImage: false },
+            { id: 2, title: "부산 서면 골목 타코야끼 존맛탱 집 발견", summary: "매운맛 오리지널 반반 주문 필수입니다. 가문어 아니고 진짜 큰 문어가 씹혀요.", tags: ["서면맛집", "타코야끼", "간식"], author: "푸드파이터", date: "일주일 전", views: 360, likes: 54, bookmarked: false, liked: false, hasImage: true },
+            { id: 1, title: "영도 등대 근처 해녀촌 해산물 가격대 어떤가요?", summary: "모둠으로 먹으면 얼만지, 성게알에 김밥 싸 먹는 조합 가격도 미리 알고 가고 싶어요.", tags: ["영도해녀촌", "해산물", "질문"], author: "성게알조아", date: "일주일 전", views: 290, likes: 15, bookmarked: false, liked: false, hasImage: false }
+        ];
+
+        let currentPage = 1;
+        const postsPerPage = 10; 
+        let filteredPosts = [...posts];
+
+        function renderBoard() {
+            const boardList = document.getElementById('boardList');
+            boardList.innerHTML = '';
+
+            if (filteredPosts.length === 0) {
+                boardList.innerHTML = `<div style="padding: 40px; text-align: center; color: #94a3b8; font-weight: 600;">검색 결과가 존재하지 않습니다.</div>`;
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
+            const startIndex = (currentPage - 1) * postsPerPage;
+            const endIndex = startIndex + postsPerPage;
+            const paginatedPosts = filteredPosts.slice(startIndex, endIndex);
+
+            paginatedPosts.forEach(post => {
+                const tagHTML = post.tags.map(tag => `<span class="tag-item">#${tag}</span>`).join('');
+                const imgBadgeHTML = post.hasImage ? `<i class="fa-regular fa-image img-attached-badge" title="이미지 첨부됨"></i>` : '';
+                
+                const postHTML = `
+                    <div class="post-item">
+                        <div class="post-number">${post.id}</div>
+                        <div class="post-main-content" onclick="increaseViews(${post.id})">
+                            <div class="post-title-wrapper">
+                                <span class="post-title">${post.title}</span>
+                                ${imgBadgeHTML}
+                            </div>
+                            <p class="post-summary">${post.summary}</p>
+                            <div class="tag-list">
+                                ${tagHTML}
+                            </div>
+                            <div class="post-meta-row">
+                                <span class="post-author">${post.author}</span>
+                                <span>&bull;</span>
+                                <span>${post.date}</span>
+                                <span>&bull;</span>
+                                <span>조회수 ${post.views}</span>
+                            </div>
+                        </div>
+                        <div class="post-stats">
+                            <div class="stat-icon like ${post.liked ? 'active' : ''}" onclick="toggleLike(${post.id}, event)">
+                                <i class="${post.liked ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+                                <span>${post.likes}</span>
+                            </div>
+                            <div class="stat-icon bookmark ${post.bookmarked ? 'active' : ''}" onclick="toggleBookmark(${post.id}, event)">
+                                <i class="${post.bookmarked ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                boardList.insertAdjacentHTML('beforeend', postHTML);
+            });
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const paginationContainer = document.getElementById('pagination');
+            paginationContainer.innerHTML = '';
+
+            const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const activeClass = i === currentPage ? 'active' : '';
+                const btnHTML = `<button class="page-btn ${activeClass}" onclick="changePage(${i})">${i}</button>`;
+                paginationContainer.insertAdjacentHTML('beforeend', btnHTML);
+            }
+        }
+
+        function changePage(pageNumber) {
+            currentPage = pageNumber;
+            renderBoard();
+            window.scrollTo({ top: 0, behavior: 'smooth' }); 
+        }
+
+        window.onload = function() {
+            renderBoard();
+        }
+
+        function searchPosts() {
+            const keyword = document.getElementById('boardSearchInput').value.toLowerCase().trim();
+            filteredPosts = posts.filter(post => {
+                return post.title.toLowerCase().includes(keyword) || 
+                       post.summary.toLowerCase().includes(keyword) ||
+                       post.author.toLowerCase().includes(keyword) ||
+                       post.tags.some(tag => tag.toLowerCase().includes(keyword));
+            });
+            currentPage = 1; 
+            renderBoard();
+        }
+
+        function increaseViews(id) {
+            const post = posts.find(p => p.id === id);
+            if(post) {
+                post.views += 1;
+                renderBoard();
+            }
+        }
+
+        function toggleLike(id, event) {
+            event.stopPropagation();
+            const post = posts.find(p => p.id === id);
+            if(post) {
+                post.liked = !post.liked;
+                post.likes += post.liked ? 1 : -1;
+                renderBoard();
+            }
+        }
+
+        function toggleBookmark(id, event) {
+            event.stopPropagation();
+            const post = posts.find(p => p.id === id);
+            if(post) {
+                post.bookmarked = !post.bookmarked;
+                renderBoard();
+            }
+        }
+
+        function openWriteModal() {
+            document.getElementById('writeModal').style.display = 'flex';
+        }
+
+        function closeWriteModal() {
+            document.getElementById('writeModal').style.display = 'none';
+            resetForm();
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('imageFilePreview');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function submitNewPost() {
+            const title = document.getElementById('postTitleInput').value.trim();
+            const author = document.getElementById('postAuthorInput').value.trim();
+            const content = document.getElementById('postContentInput').value.trim();
+            const tagsText = document.getElementById('postTagInput').value.trim();
+            const fileInput = document.getElementById('imageFileInput');
+            
+            if(!title || !author || !content) {
+                alert("제목, 작성자, 내용은 필수 입력사항입니다!");
+                return;
+            }
+
+            const tags = tagsText ? tagsText.split(',').map(tag => tag.trim()) : [];
+            const hasImage = fileInput.files.length > 0;
+
+            const nextId = posts.length > 0 ? Math.max(...posts.map(p => p.id)) + 1 : 1;
+
+            const newPost = {
+                id: nextId,
+                title: title,
+                summary: content,
+                tags: tags,
+                author: author,
+                date: "방금 전",
+                views: 0,
+                likes: 0,
+                bookmarked: false,
+                liked: false,
+                hasImage: hasImage
+            };
+
+            posts.unshift(newPost);
+            
+            filteredPosts = [...posts];
+            currentPage = 1;
+            
+            closeWriteModal();
+            renderBoard();
+        }
+
+        function resetForm() {
+            document.getElementById('postTitleInput').value = '';
+            document.getElementById('postAuthorInput').value = '';
+            document.getElementById('postContentInput').value = '';
+            document.getElementById('postTagInput').value = '';
+            document.getElementById('imageFileInput').value = '';
+            const preview = document.getElementById('imageFilePreview');
+            preview.src = '';
+            preview.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
