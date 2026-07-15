@@ -37,7 +37,8 @@ const form = ref({
   title: '',
   content: '',
   password: '',
-  editingId: null
+  editingId: null,
+  _isDelete: false
 })
 
 const boardMode = ref('list')
@@ -80,7 +81,8 @@ function resetForm() {
     title: '',
     content: '',
     password: '',
-    editingId: null
+    editingId: null,
+    _isDelete: false
   }
   boardMessage.value = ''
 }
@@ -101,15 +103,44 @@ function submitPost() {
     boardMessage.value = '제목, 내용, 비밀번호를 모두 입력해주세요.'
     return
   }
+  // deletion flow
+  if (form.value._isDelete && form.value.editingId) {
+    const original = posts.value.find((p) => p.id === form.value.editingId)
+    if (!original) {
+      boardMessage.value = '원본 게시글을 찾을 수 없습니다.'
+      return
+    }
 
+    if (form.value.password.trim() !== original.password) {
+      boardMessage.value = '비밀번호가 일치하지 않습니다.'
+      return
+    }
+
+    posts.value = posts.value.filter((item) => item.id !== form.value.editingId)
+    if (selectedPostId.value === form.value.editingId) selectedPostId.value = null
+    boardMessage.value = '게시글이 삭제되었습니다.'
+    resetForm()
+    boardMode.value = 'list'
+    return
+  }
   if (form.value.editingId) {
+    const original = posts.value.find((p) => p.id === form.value.editingId)
+    if (!original) {
+      boardMessage.value = '원본 게시글을 찾을 수 없습니다.'
+      return
+    }
+
+    if (form.value.password.trim() !== original.password) {
+      boardMessage.value = '비밀번호가 일치하지 않습니다.'
+      return
+    }
+
     posts.value = posts.value.map((post) =>
       post.id === form.value.editingId
         ? {
             ...post,
             title: form.value.title.trim(),
             content: form.value.content.trim(),
-            password: form.value.password.trim(),
             updatedAt: new Date().toLocaleString('ko-KR')
           }
         : post
@@ -146,29 +177,26 @@ function editPost(post) {
     title: post.title,
     content: post.content,
     password: '',
-    editingId: post.id
+    editingId: post.id,
+    _isDelete: false
   }
+  boardMessage.value = ''
   boardMode.value = 'form'
 }
 
 function deletePost(postId) {
   const post = posts.value.find((item) => item.id === postId)
   if (!post) return
-
-  const password = window.prompt('삭제하려면 비밀번호를 입력하세요.')
-  if (password === null) return
-
-  if (password !== post.password) {
-    window.alert('비밀번호가 일치하지 않습니다.')
-    return
+  // open the form in delete mode so user can enter password and confirm
+  form.value = {
+    title: post.title,
+    content: post.content,
+    password: '',
+    editingId: postId,
+    _isDelete: true
   }
-
-  posts.value = posts.value.filter((item) => item.id !== postId)
-  if (selectedPostId.value === postId) {
-    selectedPostId.value = null
-  }
-  boardMode.value = 'list'
-  boardMessage.value = '게시글이 삭제되었습니다.'
+  boardMessage.value = '삭제하려면 비밀번호를 입력한 뒤 삭제 버튼을 누르세요.'
+  boardMode.value = 'form'
 }
 
 function updateFormField(field, value) {

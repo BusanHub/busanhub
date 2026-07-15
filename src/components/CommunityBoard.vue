@@ -46,12 +46,12 @@ const emit = defineEmits([
   <div v-if="boardMessage" class="message">{{ boardMessage }}</div>
 
   <div v-if="boardMode === 'form'" class="form-box">
-    <h3>{{ form.editingId ? '게시글 수정' : '게시글 작성' }}</h3>
+    <h3>{{ form._isDelete ? '게시글 삭제' : form.editingId ? '게시글 수정' : '게시글 작성' }}</h3>
     <input :value="form.title" placeholder="제목" @input="emit('update-field', 'title', $event.target.value)" />
     <textarea :value="form.content" rows="5" placeholder="내용" @input="emit('update-field', 'content', $event.target.value)"></textarea>
     <input :value="form.password" type="password" placeholder="수정/삭제용 비밀번호" @input="emit('update-field', 'password', $event.target.value)" />
     <div class="actions">
-      <button class="primary-btn" @click="emit('submit-post')">저장</button>
+      <button class="primary-btn" @click="emit('submit-post')">{{ form._isDelete ? '삭제' : '저장' }}</button>
       <button class="ghost-btn" @click="emit('cancel-form')">취소</button>
     </div>
   </div>
@@ -107,8 +107,8 @@ const emit = defineEmits([
 }
 
 .message {
-  background: #e9f7ee;
-  color: #226b3c;
+  background: #ffe9e9;
+  color: #b30000;
   padding: 10px 12px;
   border-radius: 10px;
   margin-bottom: 12px;
