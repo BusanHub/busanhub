@@ -80,7 +80,7 @@ const heroNavItems = [
   { id: 'lodging', label: '숙박' },
   { id: 'festival', label: '축제' },
   { id: 'course', label: '여행코스' },
-  { id: 'community', label: '게시글' }
+  { id: 'community', label: '소통마당' }
 ]
 
 const posts = ref([])
@@ -497,10 +497,6 @@ function fallbackReply(text) {
       </section>
 
       <section id="community" class="panel">
-        <div class="section-heading">
-          <h2>익명 커뮤니티</h2>
-          <p>부산 여행 이야기를 자유롭게 남겨보세요.</p>
-        </div>
         <CommunityBoard
           :posts="posts"
           :board-message="boardMessage"
