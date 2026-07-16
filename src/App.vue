@@ -59,6 +59,15 @@ const stats = computed(() => ({
   posts: posts.value.length
 }))
 
+const searchTerm = ref('')
+const filteredPosts = computed(() => {
+  const q = String(searchTerm.value || '').trim().toLowerCase()
+  if (!q) return posts.value
+  return posts.value.filter((p) => {
+    return (String(p.title || '').toLowerCase().includes(q) || String(p.content || '').toLowerCase().includes(q))
+  })
+})
+
 const selectedPost = computed(() =>
   posts.value.find((post) => post.id === selectedPostId.value) || null
 )

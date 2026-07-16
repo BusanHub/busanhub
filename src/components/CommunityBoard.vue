@@ -1,5 +1,5 @@
 <script setup>
-import { computed, toRefs } from 'vue'
+import { computed, toRefs, ref } from 'vue'
 
 const props = defineProps({
   posts: {
@@ -42,10 +42,21 @@ const postNumberMap = computed(() => {
   }
 })
 
-// posts sorted for display: createdAt descending (newest first)
+// local search state
+const search = ref('')
+function onSearchInput(e) {
+  search.value = e.target.value || ''
+}
+
+// posts sorted for display: filter by search (title/content), then createdAt descending (newest first)
 const sortedPosts = computed(() => {
   try {
-    return (posts.value || []).slice().sort((a, b) => (Number(b?.createdAt) || 0) - (Number(a?.createdAt) || 0))
+    const q = String(search.value || '').trim().toLowerCase()
+    const base = (posts.value || []).filter((p) => {
+      if (!q) return true
+      return String(p.title || '').toLowerCase().includes(q) || String(p.content || '').toLowerCase().includes(q)
+    })
+    return base.slice().sort((a, b) => (Number(b?.createdAt) || 0) - (Number(a?.createdAt) || 0))
   } catch {
     return posts.value || []
   }
@@ -88,9 +99,9 @@ function formatRelativeTime(ts) {
 
 <template>
   <div class="section-head">
-    <div>
-      <h2>익명 커뮤니티</h2>
-      <p>비밀번호를 이용해 수정·삭제가 가능한 로컬 게시판입니다.</p>
+    <div class="left">
+      <h2>소통마당</h2>
+      <input class="search-input" placeholder="제목, 내용 검색..." :value="search" @input="onSearchInput" />
     </div>
     <button class="primary-btn" @click="emit('open-create')">글쓰기</button>
   </div>
