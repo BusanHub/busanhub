@@ -34,6 +34,23 @@ const emit = defineEmits([
   'toggle-like',
   'toggle-bookmark'
 ])
+
+function formatRelativeTime(ts) {
+  if (!ts) return ''
+  const time = typeof ts === 'number' ? ts : Number(ts)
+  if (!time || Number.isNaN(time)) return ''
+  const now = Date.now()
+  const diff = now - time
+  const minute = 60 * 1000
+  const hour = 60 * minute
+  const day = 24 * hour
+
+  if (diff < minute) return '방금전'
+  if (diff < hour) return `${Math.floor(diff / minute)}분전`
+  const daysDiff = Math.floor(diff / day)
+  if (daysDiff >= 1) return daysDiff === 1 ? '어제' : `${daysDiff}일 전`
+  return `${Math.floor(diff / hour)}시간 전`
+}
 </script>
 
 <template>
@@ -60,7 +77,7 @@ const emit = defineEmits([
 
   <div v-else-if="boardMode === 'detail' && selectedPost" class="detail-box">
     <h3>{{ selectedPost.title }}</h3>
-    <p class="meta">{{ selectedPost.createdAt }} · 조회수 {{ selectedPost.views || 0 }}</p>
+    <p class="meta">{{ formatRelativeTime(selectedPost.createdAt) }} · 조회수 {{ selectedPost.views || 0 }}</p>
     <p>{{ selectedPost.content }}</p>
     <div class="actions">
         <button class="icon-btn" @click.stop="emit('toggle-like', selectedPost.id)">❤️ {{ selectedPost.likes || 0 }}</button>
@@ -80,7 +97,7 @@ const emit = defineEmits([
       <span>
           <button class="icon-btn" @click.stop="emit('toggle-like', post.id)">❤️ {{ post.likes || 0 }}</button>
           <button class="icon-btn" @click.stop="emit('toggle-bookmark', post.id)">🔖 {{ post.bookmarks || 0 }}</button>
-        {{ post.createdAt }} · 조회수 {{ post.views || 0 }}
+        {{ formatRelativeTime(post.createdAt) }} · 조회수 {{ post.views || 0 }}
       </span>
     </li>
   </ul>

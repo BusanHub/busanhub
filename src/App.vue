@@ -68,14 +68,34 @@ function loadPosts() {
     const saved = localStorage.getItem('localhub-posts')
     const raw = saved ? JSON.parse(saved) : []
     // ensure posts have views, likes and bookmark fields
-    posts.value = raw.map((p) => ({
-      views: p.views || 0,
-      likes: p.likes || 0,
-      liked: p.liked || false,
-      bookmarks: p.bookmarks || 0,
-      bookmarked: p.bookmarked || false,
-      ...p
-    }))
+    posts.value = raw.map((p) => {
+      // helper to robustly parse stored timestamps (number, numeric-string, ISO string)
+      const parseTimestamp = (val, fallback = null) => {
+        if (val == null) return fallback
+        if (typeof val === 'number') return val
+        // numeric strings ("162...") -> Number
+        const asNum = Number(val)
+        if (!Number.isNaN(asNum) && Number.isFinite(asNum)) return asNum
+        // date strings -> Date.parse
+        const parsed = Date.parse(val)
+        return Number.isNaN(parsed) ? fallback : parsed
+      }
+
+      const createdAt = parseTimestamp(p.createdAt, Date.now())
+      const updatedAt = parseTimestamp(p.updatedAt, null)
+
+      return {
+        views: p.views || 0,
+        likes: p.likes || 0,
+        liked: p.liked || false,
+        bookmarks: p.bookmarks || 0,
+        bookmarked: p.bookmarked || false,
+        ...p,
+        // preserve existing timestamps where possible; fallback only when missing/invalid
+        createdAt,
+        updatedAt
+      }
+    })
   } catch {
     posts.value = []
   }
@@ -150,7 +170,7 @@ function submitPost() {
             ...post,
             title: form.value.title.trim(),
             content: form.value.content.trim(),
-            updatedAt: new Date().toLocaleString('ko-KR')
+            updatedAt: Date.now()
           }
         : post
     )
@@ -166,7 +186,7 @@ function submitPost() {
       liked: false,
       bookmarks: 0,
       bookmarked: false,
-      createdAt: new Date().toLocaleString('ko-KR'),
+      createdAt: Date.now(),
       updatedAt: null
     })
     boardMessage.value = '게시글이 등록되었습니다.'
