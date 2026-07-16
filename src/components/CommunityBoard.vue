@@ -77,11 +77,17 @@ function formatRelativeTime(ts) {
 
   <div v-else-if="boardMode === 'detail' && selectedPost" class="detail-box">
     <h3>{{ selectedPost.title }}</h3>
-    <p class="meta">{{ formatRelativeTime(selectedPost.createdAt) }} · 조회수 {{ selectedPost.views || 0 }}</p>
     <p>{{ selectedPost.content }}</p>
+    <p class="meta meta-below">{{ formatRelativeTime(selectedPost.createdAt) }} · 조회수 {{ selectedPost.views || 0 }}</p>
     <div class="actions">
-        <button class="icon-btn" @click.stop="emit('toggle-like', selectedPost.id)">❤️ {{ selectedPost.likes || 0 }}</button>
-      <button class="icon-btn" @click.stop="emit('toggle-bookmark', selectedPost.id)">🔖 {{ selectedPost.bookmarks || 0 }}</button>
+        <button :class="['icon-btn', { liked: selectedPost.liked }]" @click.stop="emit('toggle-like', selectedPost.id)" aria-label="좋아요">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M12 21s-7.5-4.35-10-7.09C-0.1 10.6 2.5 6 6 6c2.1 0 3.2 1.1 4 2.1C11.8 7.1 12.9 6 15 6c3.5 0 6.1 4.6 4 7.91C19.5 16.65 12 21 12 21z"/></svg>
+          <span class="count">{{ selectedPost.likes || 0 }}</span>
+        </button>
+      <button :class="['icon-btn', { bookmarked: selectedPost.bookmarked }]" @click.stop="emit('toggle-bookmark', selectedPost.id)" aria-label="북마크">
+          <svg viewBox="0 0 24 24" width="14" height="18" aria-hidden="true" focusable="false"><path d="M6 2h12v18l-6-3-6 3V2z"/></svg>
+          <span class="count">{{ selectedPost.bookmarks || 0 }}</span>
+      </button>
       <button class="primary-btn" @click="emit('edit-post', selectedPost)">수정</button>
       <button class="ghost-btn" @click="emit('delete-post', selectedPost.id)">삭제</button>
       <button class="ghost-btn" @click="emit('back-list')">목록</button>
@@ -90,15 +96,21 @@ function formatRelativeTime(ts) {
 
   <ul v-else class="post-list">
     <li v-for="post in posts" :key="post.id" class="post-item" @click="emit('open-post', post)">
-      <div>
+      <div class="post-main">
         <strong>{{ post.title }}</strong>
         <p>{{ post.content }}</p>
+        <p class="meta meta-below">{{ formatRelativeTime(post.createdAt) }} · 조회수 {{ post.views || 0 }}</p>
       </div>
-      <span>
-          <button class="icon-btn" @click.stop="emit('toggle-like', post.id)">❤️ {{ post.likes || 0 }}</button>
-          <button class="icon-btn" @click.stop="emit('toggle-bookmark', post.id)">🔖 {{ post.bookmarks || 0 }}</button>
-        {{ formatRelativeTime(post.createdAt) }} · 조회수 {{ post.views || 0 }}
-      </span>
+      <div class="post-actions">
+        <button :class="['icon-btn', { liked: post.liked }]" @click.stop="emit('toggle-like', post.id)" aria-label="좋아요">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M12 21s-7.5-4.35-10-7.09C-0.1 10.6 2.5 6 6 6c2.1 0 3.2 1.1 4 2.1C11.8 7.1 12.9 6 15 6c3.5 0 6.1 4.6 4 7.91C19.5 16.65 12 21 12 21z"/></svg>
+          <span class="count">{{ post.likes || 0 }}</span>
+        </button>
+        <button :class="['icon-btn', { bookmarked: post.bookmarked }]" @click.stop="emit('toggle-bookmark', post.id)" aria-label="북마크">
+          <svg viewBox="0 0 24 24" width="14" height="18" aria-hidden="true" focusable="false"><path d="M6 2h12v18l-6-3-6 3V2z"/></svg>
+          <span class="count">{{ post.bookmarks || 0 }}</span>
+        </button>
+      </div>
     </li>
   </ul>
 </template>
@@ -179,6 +191,17 @@ textarea {
   background: #fbfdff;
 }
 
+.post-main {
+  flex: 1 1 auto;
+}
+
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+}
+
 .post-item p {
   margin: 4px 0 0;
   color: #647382;
@@ -189,9 +212,46 @@ textarea {
   border: none;
   background: transparent;
   cursor: pointer;
-  color: #54707f;
-  margin-right: 6px;
+  color: #000; /* default black color for icon and number */
+  margin-right: 0;
   font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+}
+
+.icon-btn svg {
+  display: block;
+  /* outline by default: no fill, stroke uses currentColor */
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.icon-btn .count {
+  color: inherit;
+}
+
+.icon-btn.liked {
+  color: #ff4d4f; /* red for liked */
+}
+
+.icon-btn.bookmarked {
+  color: #f5c542; /* yellow for bookmarked */
+}
+
+/* when active, fill the icon and remove stroke */
+.icon-btn.liked svg path,
+.icon-btn.bookmarked svg path {
+  fill: currentColor;
+  stroke: none;
+}
+
+.icon-btn svg path {
+  transition: fill 0.12s ease, stroke 0.12s ease, transform 0.12s ease;
 }
 
 @media (max-width: 700px) {
@@ -200,5 +260,10 @@ textarea {
     align-items: flex-start;
     gap: 6px;
   }
+}
+.meta-below {
+  margin-top: 8px;
+  color: #647382;
+  font-size: 0.9rem;
 }
 </style>

@@ -96,6 +96,7 @@ function loadPosts() {
         updatedAt
       }
     })
+    if (!posts.value || posts.value.length === 0) posts.value = []
   } catch {
     posts.value = []
   }
