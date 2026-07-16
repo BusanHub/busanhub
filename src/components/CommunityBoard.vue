@@ -1,5 +1,7 @@
 <script setup>
-defineProps({
+import { computed, toRefs } from 'vue'
+
+const props = defineProps({
   posts: {
     type: Array,
     required: true
@@ -21,6 +23,37 @@ defineProps({
     required: true
   }
 })
+// expose props as refs to use reactively in script and template
+const { posts, boardMessage, boardMode, selectedPost, form } = toRefs(props)
+
+// Return sequential number (oldest post = 1) for a given post
+// build a stable mapping key for posts
+const keyOf = (p) => (p && p.id) ? `id:${p.id}` : `ct:${Number(p?.createdAt)||0}-t:${String(p?.title||'')}`
+
+// computed map from key -> sequential number (oldest = 1)
+const postNumberMap = computed(() => {
+  try {
+    const arr = (posts.value || []).slice().sort((a, b) => (Number(a?.createdAt) || 0) - (Number(b?.createdAt) || 0))
+    const map = new Map()
+    arr.forEach((p, idx) => map.set(keyOf(p), idx + 1))
+    return map
+  } catch {
+    return new Map()
+  }
+})
+
+// posts sorted for display: createdAt descending (newest first)
+const sortedPosts = computed(() => {
+  try {
+    return (posts.value || []).slice().sort((a, b) => (Number(b?.createdAt) || 0) - (Number(a?.createdAt) || 0))
+  } catch {
+    return posts.value || []
+  }
+})
+
+function getPostNumber(post) {
+  return postNumberMap.value.get(keyOf(post)) ?? ''
+}
 
 const emit = defineEmits([
   'open-create',
@@ -95,11 +128,14 @@ function formatRelativeTime(ts) {
   </div>
 
   <ul v-else class="post-list">
-    <li v-for="post in posts" :key="post.id" class="post-item" @click="emit('open-post', post)">
+    <li v-for="(post, idx) in sortedPosts" :key="post.id || idx" class="post-item" @click="emit('open-post', post)">
       <div class="post-main">
-        <strong>{{ post.title }}</strong>
-        <p>{{ post.content }}</p>
-        <p class="meta meta-below">{{ formatRelativeTime(post.createdAt) }} · 조회수 {{ post.views || 0 }}</p>
+        <div class="index-number">{{ getPostNumber(post) }}</div>
+        <div class="post-body">
+          <strong>{{ post.title }}</strong>
+          <p>{{ post.content }}</p>
+          <p class="meta meta-below">{{ formatRelativeTime(post.createdAt) }} · 조회수 {{ post.views || 0 }}</p>
+        </div>
       </div>
       <div class="post-actions">
         <button :class="['icon-btn', { liked: post.liked }]" @click.stop="emit('toggle-like', post.id)" aria-label="좋아요">
@@ -193,6 +229,29 @@ textarea {
 
 .post-main {
   flex: 1 1 auto;
+  display: flex;
+  align-items: center; /* vertical center the number and content */
+}
+
+.index-number {
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #2b7fff; /* more visible blue */
+  font-weight: 700;
+  margin-right: 16px;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  background: #eef7ff; /* subtle background to ensure contrast */
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+}
+
+.post-body {
+  display: block;
 }
 
 .post-actions {

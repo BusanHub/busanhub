@@ -81,7 +81,7 @@ function loadPosts() {
         return Number.isNaN(parsed) ? fallback : parsed
       }
 
-      const createdAt = parseTimestamp(p.createdAt, Date.now())
+      const createdAt = parseTimestamp(p.createdAt, null)
       const updatedAt = parseTimestamp(p.updatedAt, null)
 
       return {
@@ -96,6 +96,21 @@ function loadPosts() {
         updatedAt
       }
     })
+    // If some posts lack a valid createdAt, assign stable fallback times so ordering/numbering works.
+    // We distribute missing times so older items get smaller timestamps: oldest -> now - n*1min
+    const missingCount = posts.value.filter((x) => !x.createdAt).length
+    if (missingCount > 0) {
+      const now = Date.now()
+      // assign incremental times for missing entries based on their index in posts.value
+      posts.value.forEach((p, idx) => {
+        if (!p.createdAt) {
+          // give it a timestamp spaced by minutes from now backwards to keep deterministic order
+          p.createdAt = now - (posts.value.length - idx) * 60_000
+        }
+      })
+      // persist corrected timestamps so subsequent loads have createdAt
+      savePosts()
+    }
     if (!posts.value || posts.value.length === 0) posts.value = []
   } catch {
     posts.value = []
@@ -171,6 +186,8 @@ function submitPost() {
             ...post,
             title: form.value.title.trim(),
             content: form.value.content.trim(),
+            // preserve or ensure createdAt exists
+            createdAt: post.createdAt || Date.now(),
             updatedAt: Date.now()
           }
         : post
