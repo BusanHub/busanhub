@@ -7,6 +7,10 @@ defineProps({
   stats: {
     type: Object,
     required: true
+  },
+  navItems: {
+    type: Array,
+    default: () => []
   }
 })
 </script>
@@ -18,40 +22,39 @@ defineProps({
       <p>부산의 모든 정보와 익명 커뮤니티를 한 번에 만나보세요.</p>
     </div>
 
-    <div class="hero-stats">
-      <div>
-        <strong>{{ stats.attractions }}</strong>
-        <span>관광지</span>
-      </div>
-      <div>
-        <strong>{{ stats.festivals }}</strong>
-        <span>축제</span>
-      </div>
-      <div>
-        <strong>{{ stats.posts }}</strong>
-        <span>게시글</span>
-      </div>
+    <div v-if="navItems.length" class="hero-nav">
+      <a
+        v-for="item in navItems"
+        :key="item.id"
+        :href="`#${item.id}`"
+        class="nav-chip"
+      >
+        {{ item.label }}
+      </a>
     </div>
   </header>
 </template>
 
 <style scoped>
 .hero {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
   background: linear-gradient(135deg, #0d4c92, #2b7fff);
   color: white;
-  padding: 48px 24px;
+  padding: 24px 24px 20px;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  opacity: 0.8;
-  margin-bottom: 8px;
+.hero-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .hero h1 {
@@ -59,22 +62,24 @@ defineProps({
   font-size: 2.2rem;
 }
 
-.hero-stats {
+.hero-nav {
   display: flex;
-  gap: 12px;
   flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
 }
 
-.hero-stats > div {
-  background: rgba(255,255,255,0.16);
-  padding: 12px 16px;
-  border-radius: 12px;
-  min-width: 90px;
-  text-align: center;
+.nav-chip {
+  text-decoration: none;
+  color: white;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.92rem;
 }
 
-.hero-stats strong {
-  display: block;
-  font-size: 1.2rem;
+.nav-chip:hover {
+  background: rgba(255, 255, 255, 0.28);
 }
 </style>

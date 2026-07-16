@@ -9,10 +9,10 @@ import lodgingData from './data/부산/부산_숙박.json'
 import courseData from './data/부산/부산_여행코스.json'
 
 import HeroSection from './components/HeroSection.vue'
-import TouristList from './components/TouristList.vue'
-import FestivalList from './components/FestivalList.vue'
+import CardList from "./components/CardList.vue";
 import CommunityBoard from './components/CommunityBoard.vue'
 import ChatbotPanel from './components/ChatbotPanel.vue'
+
 
 const regionName = '부산'
 
@@ -32,6 +32,57 @@ const festivals = computed(() =>
   }))
 )
 
+const leisureItems = computed(() =>
+  leisureData.items.slice(0, 6).map((item) => ({
+    title: item.title,
+    address: item.addr1 || '주소 정보 없음',
+    image: item.firstimage || 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80'
+  }))
+)
+
+const cultureItems = computed(() =>
+  cultureData.items.slice(0, 6).map((item) => ({
+    title: item.title,
+    address: item.addr1 || '주소 정보 없음',
+    image: item.firstimage || 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&w=800&q=80'
+  }))
+)
+
+const shoppingItems = computed(() =>
+  shoppingData.items.slice(0, 6).map((item) => ({
+    title: item.title,
+    address: item.addr1 || '주소 정보 없음',
+    image: item.firstimage || 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=800&q=80'
+  }))
+)
+
+const lodgingItems = computed(() =>
+  lodgingData.items.slice(0, 6).map((item) => ({
+    title: item.title,
+    address: item.addr1 || '주소 정보 없음',
+    image: item.firstimage || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80'
+  }))
+)
+
+const courses = computed(() =>
+  courseData.items.slice(0, 6).map((item) => ({
+    title: item.title,
+    address: item.addr1 || '주소 정보 없음',
+    image: item.firstimage || 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80'
+  }))
+)
+
+const heroNavItems = [
+  { id: 'tourism', label: '관광지' },
+  { id: 'leisure', label: '레포츠' },
+  { id: 'culture', label: '문화시설' },
+  { id: 'shopping', label: '쇼핑' },
+  { id: 'lodging', label: '숙박' },
+  { id: 'festival', label: '축제' },
+  { id: 'course', label: '여행코스' },
+  { id: 'community', label: '게시글' }
+]
+
 const posts = ref([])
 const form = ref({
   title: '',
@@ -47,7 +98,7 @@ const chatOpen = ref(false)
 const chatMessages = ref([
   {
     role: 'assistant',
-    content: '안녕하세요! 부산 여행 도우미입니다. 관광지, 축제, 커뮤니티 게시글에 대해 질문해보세요.'
+    content: '안녕하세요! 부산 여행 도우미입니다. 관광지, 축제, 레포츠, 문화시설, 쇼핑, 숙박, 여행코스, 커뮤니티 게시글에 대해 질문해보세요.'
   }
 ])
 const chatDraft = ref('')
@@ -55,6 +106,11 @@ const chatDraft = ref('')
 const stats = computed(() => ({
   attractions: attractions.value.length,
   festivals: festivals.value.length,
+  leisure: leisureItems.value.length,
+  culture: cultureItems.value.length,
+  shopping: shoppingItems.value.length,
+  lodging: lodgingItems.value.length,
+  courses: courses.value.length,
   posts: posts.value.length
 }))
 
@@ -205,11 +261,11 @@ async function getBotReply(text) {
 부산 지역 정보 요약:
 - 관광지: ${attractions.value.slice(0, 5).map((item) => item.title).join(', ')}
 - 축제: ${festivals.value.slice(0, 5).map((item) => item.title).join(', ')}
-- 레포츠: ${leisureData.items.slice(0, 5).map((item) => item.title).join(', ')}
-- 문화시설: ${cultureData.items.slice(0, 5).map((item) => item.title).join(', ')}
-- 쇼핑: ${shoppingData.items.slice(0, 5).map((item) => item.title).join(', ')}
-- 숙박: ${lodgingData.items.slice(0, 5).map((item) => item.title).join(', ')}
-- 여행코스: ${courseData.items.slice(0, 5).map((item) => item.title).join(', ')}
+- 레포츠: ${leisureItems.value.slice(0, 5).map((item) => item.title).join(', ')}
+- 문화시설: ${cultureItems.value.slice(0, 5).map((item) => item.title).join(', ')}
+- 쇼핑: ${shoppingItems.value.slice(0, 5).map((item) => item.title).join(', ')}
+- 숙박: ${lodgingItems.value.slice(0, 5).map((item) => item.title).join(', ')}
+- 여행코스: ${courses.value.slice(0, 5).map((item) => item.title).join(', ')}
 - 커뮤니티 게시글: ${posts.value.slice(0, 5).map((post) => post.title).join(', ')}
 `
 
@@ -262,6 +318,22 @@ function fallbackReply(text) {
     return `부산의 축제 추천으로는 ${festivals.value[0]?.title || '부산국제불교박람회'}를 먼저 살펴보시면 좋아요.`
   }
 
+  if (lower.includes('레포츠')) {
+    return `부산의 레포츠로는 ${leisureItems.value[0]?.title || '스카이라인 루지 부산'}를 추천해요.`
+  }
+
+  if (lower.includes('문화')) {
+    return `문화시설 추천으로는 ${cultureItems.value[0]?.title || '부산박물관'}을 고려해보세요.`
+  }
+
+  if (lower.includes('쇼핑')) {
+    return `쇼핑 추천으로는 ${shoppingItems.value[0]?.title || '부산국제시장'}을 추천해요.`
+  }
+
+  if (lower.includes('숙박')) {
+    return `숙박은 ${lodgingItems.value[0]?.title || '해운대 호텔'} 쪽을 먼저 확인해보세요.`
+  }
+
   if (lower.includes('관광') || lower.includes('추천')) {
     return `추천 관광지는 ${attractions.value[0]?.title || '해운대'}와 ${attractions.value[1]?.title || '광안리'}를 고려해보세요.`
   }
@@ -270,28 +342,48 @@ function fallbackReply(text) {
     return '커뮤니티 게시판에서는 제목, 내용, 비밀번호를 입력해 익명 글을 작성하고 수정·삭제할 수 있습니다.'
   }
 
-  if (lower.includes('맛') || lower.includes('음식')) {
-    return '부산 맛집 관련은 현재 샘플 데이터 기준으로 관광지와 축제 중심으로 안내하고 있습니다.'
-  }
-
-  return '부산 관광지, 축제, 커뮤니티 게시글에 대해 질문해 주세요.'
+  return '부산 관광지, 레포츠, 문화시설, 쇼핑, 숙박, 축제, 여행코스, 커뮤니티 게시글에 대해 질문해 주세요.'
 }
 </script>
 
 <template>
   <div class="page">
-    <HeroSection :region-name="regionName" :stats="stats" />
+    <HeroSection :region-name="regionName" :stats="stats" :nav-items="heroNavItems" />
 
     <main class="content">
-      <section class="panel">
-        <TouristList :attractions="attractions" />
+      <section id="tourism" class="panel">
+        <CardList :items="attractions" title="관광지" description="부산의 대표 관광지를 바로 확인하세요."/>
       </section>
 
-      <section class="panel">
-        <FestivalList :festivals="festivals" />
+      <section id="leisure" class="panel">
+        <CardList :items="leisureItems" title="레포츠" description="액티비티를 즐기고 싶다면 레포츠 코스를 확인해보세요."/>
       </section>
 
-      <section class="panel">
+      <section id="culture" class="panel">
+        <CardList :items="cultureItems" title="문화시설" description="전시, 공연, 역사 공간을 함께 둘러보세요."/>
+      </section>
+
+      <section id="shopping" class="panel">
+        <CardList :items="shoppingItems" title="쇼핑" description="시장과 쇼핑 명소로 부산의 분위기를 즐겨보세요."/>
+      </section>
+
+      <section id="lodging" class="panel">
+        <CardList :items="lodgingItems" title="숙박" description="부산 여행의 편안한 휴식을 위한 숙소를 확인해보세요."/>
+      </section>
+
+      <section id="festival" class="panel">
+        <CardList :items="festivals" title="축제" description="다가오는 축제와 행사를 미리 확인해보세요."/>
+      </section>
+
+      <section id="course" class="panel">
+        <CardList :items="courses" title="여행코스" description="일정에 맞춰 이동하기 좋은 코스를 살펴보세요."/>
+      </section>
+
+      <section id="community" class="panel">
+        <div class="section-heading">
+          <h2>익명 커뮤니티</h2>
+          <p>부산 여행 이야기를 자유롭게 남겨보세요.</p>
+        </div>
         <CommunityBoard
           :posts="posts"
           :board-message="boardMessage"
@@ -341,5 +433,54 @@ function fallbackReply(text) {
   border-radius: 18px;
   padding: 24px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  scroll-margin-top: 120px;
+}
+
+.section-heading {
+  margin-bottom: 16px;
+}
+
+.section-heading h2 {
+  margin: 0 0 6px;
+  font-size: 1.25rem;
+}
+
+.section-heading p {
+  margin: 0;
+  color: #64748b;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: #f8fbff;
+  border: 1px solid #e8eef6;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.card img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+}
+
+.card-body {
+  padding: 12px;
+}
+
+.card h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.card p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.92rem;
 }
 </style>

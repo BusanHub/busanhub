@@ -1,28 +1,45 @@
 <script setup>
 defineProps({
-  attractions: {
+  title: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    default: "",
+  },
+  items: {
     type: Array,
-    required: true
-  }
-})
+    default: () => [],
+  },
+});
 </script>
 
-<template>
-  <div class="section-head">
-    <h2>부산 관광지 추천</h2>
-    <p>부산의 대표 관광지를 바로 확인하세요.</p>
-  </div>
 
-  <div class="card-grid">
-    <article v-for="place in attractions" :key="place.title" class="card">
-      <img :src="place.image" :alt="place.title" />
-      <div class="card-body">
-        <h3>{{ place.title }}</h3>
-        <p>{{ place.address }}</p>
-      </div>
-    </article>
+<template>
+  <div>
+    <div class="section-head">
+      <h2>{{ title }}</h2>
+      <p>{{ description }}</p>
+    </div>
+
+    <div class="card-grid">
+      <article
+        v-for="item in items"
+        :key="item.title"
+        class="card"
+      >
+        <img :src="item.image" :alt="item.title" />
+
+        <div class="card-body">
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.address }}</p>
+        </div>
+      </article>
+    </div>
   </div>
 </template>
+
 
 <style scoped>
 .section-head {
