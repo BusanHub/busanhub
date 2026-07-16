@@ -23,8 +23,10 @@ const emit = defineEmits(['toggle-chat', 'update-draft', 'send-message'])
 
     <div v-if="isOpen" class="chat-box">
       <div class="chat-header">
-        <strong>BusanHub 챗봇</strong>
-        <button @click="emit('toggle-chat')">닫기</button>
+        <div class="header-left">
+          <strong class="header-title">BusanHub 챗봇</strong>
+        </div>
+        <button class="close-btn" @click="emit('toggle-chat')">✕</button>
       </div>
 
       <div class="chat-messages">
@@ -59,10 +61,16 @@ const emit = defineEmits(['toggle-chat', 'update-draft', 'send-message'])
   height: 56px;
   border: none;
   border-radius: 50%;
-  background: #2b7fff;
+  background: linear-gradient(90deg,#00a8ff,#00d2fc);
   color: white;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .chat-box {
@@ -74,9 +82,20 @@ const emit = defineEmits(['toggle-chat', 'update-draft', 'send-message'])
   border-radius: 16px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
   overflow: hidden;
+  height: 560px; /* increased height */
+  display: flex;
+  flex-direction: column;
 }
 
-.chat-header,
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(90deg,#00a8ff,#00d2fc);
+  color: white;
+}
+
 .chat-input {
   display: flex;
   justify-content: space-between;
@@ -86,10 +105,10 @@ const emit = defineEmits(['toggle-chat', 'update-draft', 'send-message'])
 }
 
 .chat-messages {
-  display: grid;
+  display: block;
   gap: 8px;
-  padding: 12px;
-  max-height: 320px;
+  padding: 16px;
+  flex: 1 1 auto;
   overflow-y: auto;
   background: #fcfdff;
 }
@@ -120,14 +139,33 @@ const emit = defineEmits(['toggle-chat', 'update-draft', 'send-message'])
   border: 1px solid #dce8f5;
   border-radius: 10px;
   padding: 10px 12px;
+  outline: none;
+}
+
+/* prevent focus from changing border color or showing outline */
+.chat-input input:focus {
+  border-color: #dce8f5 !important;
+  box-shadow: none !important;
 }
 
 .chat-input button {
   border: none;
   border-radius: 10px;
   padding: 10px 14px;
-  background: #2b7fff;
+  background: linear-gradient(90deg,#00a8ff,#00d2fc);
   color: white;
   cursor: pointer;
 }
+
+.close-btn{
+  border: none;
+  background: transparent;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #fff;
+}
+
+.header-left{ display:flex; align-items:center; gap:10px; color: #fff }
+.robot-icon{ width:22px; height:22px; display:block; flex:0 0 auto }
+.header-title{ color: #fff; line-height:1 }
 </style>
