@@ -88,7 +88,8 @@ const form = ref({
   title: '',
   content: '',
   password: '',
-  editingId: null
+  editingId: null,
+  _isDelete: false
 })
 
 const boardMode = ref('list')
@@ -114,6 +115,15 @@ const stats = computed(() => ({
   posts: posts.value.length
 }))
 
+const searchTerm = ref('')
+const filteredPosts = computed(() => {
+  const q = String(searchTerm.value || '').trim().toLowerCase()
+  if (!q) return posts.value
+  return posts.value.filter((p) => {
+    return (String(p.title || '').toLowerCase().includes(q) || String(p.content || '').toLowerCase().includes(q))
+  })
+})
+
 const selectedPost = computed(() =>
   posts.value.find((post) => post.id === selectedPostId.value) || null
 )
@@ -121,7 +131,52 @@ const selectedPost = computed(() =>
 function loadPosts() {
   try {
     const saved = localStorage.getItem('localhub-posts')
-    posts.value = saved ? JSON.parse(saved) : []
+    const raw = saved ? JSON.parse(saved) : []
+    // ensure posts have views, likes and bookmark fields
+    posts.value = raw.map((p) => {
+      // helper to robustly parse stored timestamps (number, numeric-string, ISO string)
+      const parseTimestamp = (val, fallback = null) => {
+        if (val == null) return fallback
+        if (typeof val === 'number') return val
+        // numeric strings ("162...") -> Number
+        const asNum = Number(val)
+        if (!Number.isNaN(asNum) && Number.isFinite(asNum)) return asNum
+        // date strings -> Date.parse
+        const parsed = Date.parse(val)
+        return Number.isNaN(parsed) ? fallback : parsed
+      }
+
+      const createdAt = parseTimestamp(p.createdAt, null)
+      const updatedAt = parseTimestamp(p.updatedAt, null)
+
+      return {
+        views: p.views || 0,
+        likes: p.likes || 0,
+        liked: p.liked || false,
+        bookmarks: p.bookmarks || 0,
+        bookmarked: p.bookmarked || false,
+        ...p,
+        // preserve existing timestamps where possible; fallback only when missing/invalid
+        createdAt,
+        updatedAt
+      }
+    })
+    // If some posts lack a valid createdAt, assign stable fallback times so ordering/numbering works.
+    // We distribute missing times so older items get smaller timestamps: oldest -> now - n*1min
+    const missingCount = posts.value.filter((x) => !x.createdAt).length
+    if (missingCount > 0) {
+      const now = Date.now()
+      // assign incremental times for missing entries based on their index in posts.value
+      posts.value.forEach((p, idx) => {
+        if (!p.createdAt) {
+          // give it a timestamp spaced by minutes from now backwards to keep deterministic order
+          p.createdAt = now - (posts.value.length - idx) * 60_000
+        }
+      })
+      // persist corrected timestamps so subsequent loads have createdAt
+      savePosts()
+    }
+    if (!posts.value || posts.value.length === 0) posts.value = []
   } catch {
     posts.value = []
   }
@@ -136,7 +191,8 @@ function resetForm() {
     title: '',
     content: '',
     password: '',
-    editingId: null
+    editingId: null,
+    _isDelete: false
   }
   boardMessage.value = ''
 }
@@ -157,16 +213,47 @@ function submitPost() {
     boardMessage.value = '제목, 내용, 비밀번호를 모두 입력해주세요.'
     return
   }
+  // deletion flow
+  if (form.value._isDelete && form.value.editingId) {
+    const original = posts.value.find((p) => p.id === form.value.editingId)
+    if (!original) {
+      boardMessage.value = '원본 게시글을 찾을 수 없습니다.'
+      return
+    }
 
+    if (form.value.password.trim() !== original.password) {
+      boardMessage.value = '비밀번호가 일치하지 않습니다.'
+      return
+    }
+
+    posts.value = posts.value.filter((item) => item.id !== form.value.editingId)
+    if (selectedPostId.value === form.value.editingId) selectedPostId.value = null
+    boardMessage.value = '게시글이 삭제되었습니다.'
+    resetForm()
+    boardMode.value = 'list'
+    return
+  }
   if (form.value.editingId) {
+    const original = posts.value.find((p) => p.id === form.value.editingId)
+    if (!original) {
+      boardMessage.value = '원본 게시글을 찾을 수 없습니다.'
+      return
+    }
+
+    if (form.value.password.trim() !== original.password) {
+      boardMessage.value = '비밀번호가 일치하지 않습니다.'
+      return
+    }
+
     posts.value = posts.value.map((post) =>
       post.id === form.value.editingId
         ? {
             ...post,
             title: form.value.title.trim(),
             content: form.value.content.trim(),
-            password: form.value.password.trim(),
-            updatedAt: new Date().toLocaleString('ko-KR')
+            // preserve or ensure createdAt exists
+            createdAt: post.createdAt || Date.now(),
+            updatedAt: Date.now()
           }
         : post
     )
@@ -177,7 +264,12 @@ function submitPost() {
       title: form.value.title.trim(),
       content: form.value.content.trim(),
       password: form.value.password.trim(),
-      createdAt: new Date().toLocaleString('ko-KR'),
+      views: 0,
+      likes: 0,
+      liked: false,
+      bookmarks: 0,
+      bookmarked: false,
+      createdAt: Date.now(),
       updatedAt: null
     })
     boardMessage.value = '게시글이 등록되었습니다.'
@@ -188,6 +280,10 @@ function submitPost() {
 }
 
 function openPost(post) {
+  const idx = posts.value.findIndex((p) => p.id === post.id)
+  if (idx !== -1) {
+    posts.value[idx].views = (posts.value[idx].views || 0) + 1
+  }
   selectedPostId.value = post.id
   boardMode.value = 'detail'
 }
@@ -202,33 +298,54 @@ function editPost(post) {
     title: post.title,
     content: post.content,
     password: '',
-    editingId: post.id
+    editingId: post.id,
+    _isDelete: false
   }
+  boardMessage.value = ''
   boardMode.value = 'form'
 }
 
 function deletePost(postId) {
   const post = posts.value.find((item) => item.id === postId)
   if (!post) return
-
-  const password = window.prompt('삭제하려면 비밀번호를 입력하세요.')
-  if (password === null) return
-
-  if (password !== post.password) {
-    window.alert('비밀번호가 일치하지 않습니다.')
-    return
+  // open the form in delete mode so user can enter password and confirm
+  form.value = {
+    title: post.title,
+    content: post.content,
+    password: '',
+    editingId: postId,
+    _isDelete: true
   }
-
-  posts.value = posts.value.filter((item) => item.id !== postId)
-  if (selectedPostId.value === postId) {
-    selectedPostId.value = null
-  }
-  boardMode.value = 'list'
-  boardMessage.value = '게시글이 삭제되었습니다.'
+  boardMessage.value = '삭제하려면 비밀번호를 입력한 뒤 삭제 버튼을 누르세요.'
+  boardMode.value = 'form'
 }
 
 function updateFormField(field, value) {
   form.value[field] = value
+}
+
+function toggleLike(postId) {
+  const post = posts.value.find((p) => p.id === postId)
+  if (!post) return
+  if (post.liked) {
+    post.likes = Math.max(0, (post.likes || 0) - 1)
+    post.liked = false
+  } else {
+    post.likes = (post.likes || 0) + 1
+    post.liked = true
+  }
+}
+
+function toggleBookmark(postId) {
+  const post = posts.value.find((p) => p.id === postId)
+  if (!post) return
+  if (post.bookmarked) {
+    post.bookmarks = Math.max(0, (post.bookmarks || 0) - 1)
+    post.bookmarked = false
+  } else {
+    post.bookmarks = (post.bookmarks || 0) + 1
+    post.bookmarked = true
+  }
 }
 
 watch(posts, savePosts, { deep: true })
@@ -397,7 +514,9 @@ function fallbackReply(text) {
           @back-list="backToList"
           @edit-post="editPost"
           @delete-post="deletePost"
-          @update-field="updateFormField"
+            @update-field="updateFormField"
+            @toggle-like="toggleLike"
+            @toggle-bookmark="toggleBookmark"
         />
       </section>
     </main>
