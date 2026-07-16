@@ -98,12 +98,29 @@ function formatRelativeTime(ts) {
 </script>
 
 <template>
-  <div class="section-head">
+    <div class="section-head">
     <div class="left">
-      <h2>소통마당</h2>
-      <input class="search-input" placeholder="제목, 내용 검색..." :value="search" @input="onSearchInput" />
+      <div class="title-row">
+        <svg class="bubble-icon" viewBox="0 0 24 24" width="32" height="32" aria-hidden="true">
+          <defs>
+            <linearGradient id="gradCB" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00a8ff" />
+              <stop offset="100%" stop-color="#00d2fc" />
+            </linearGradient>
+          </defs>
+          <path d="M3 5a3 3 0 013-3h12a3 3 0 013 3v7a3 3 0 01-3 3H9l-6 3V5z" fill="none" stroke="url(#gradCB)" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+        <h2>소통마당</h2>
+      </div>
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M10.5 3a7.5 7.5 0 105.303 12.803l4.697 4.697 1.414-1.414-4.697-4.697A7.5 7.5 0 0010.5 3zM5 10.5a5.5 5.5 0 1111 0 5.5 5.5 0 01-11 0z"/></svg>
+        <input class="search-input" placeholder="제목, 내용 검색..." :value="search" @input="onSearchInput" />
+      </div>
     </div>
-    <button class="primary-btn" @click="emit('open-create')">글쓰기</button>
+    <button class="primary-btn write-btn" @click="emit('open-create')">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" class="btn-icon"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+      <span>글쓰기</span>
+    </button>
   </div>
 
   <div v-if="boardMessage" class="message">{{ boardMessage }}</div>
@@ -172,6 +189,22 @@ function formatRelativeTime(ts) {
   flex-wrap: wrap;
 }
 
+.section-head .left {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.title-row { display:flex; align-items:center; gap:10px }
+.bubble-icon { display: block }
+.section-head h2 { margin:0; font-size:1.9rem; color: #0d3b66 }
+.search-wrap{ display:flex; align-items:center; gap:10px; width:560px; max-width:100%; padding:6px 10px; border-radius:24px; border:1px solid #d9dde0; transition: border-color .12s ease, box-shadow .12s ease; background:#fff }
+.search-icon{ color: #d9dde0; flex:0 0 auto }
+.search-wrap:focus-within{ border-color: #00a8ff; box-shadow: 0 6px 18px rgba(0,168,255,0.12) }
+.search-wrap:focus-within .search-icon{ color: #00a8ff }
+.search-input{ border:none; outline:none; width:100%; padding:8px 6px; font:inherit }
+.search-input::placeholder { color:#aab6bf }
+
 .primary-btn,
 .ghost-btn {
   border: none;
@@ -181,9 +214,12 @@ function formatRelativeTime(ts) {
 }
 
 .primary-btn {
-  background: #2b7fff;
+  background: linear-gradient(90deg,#00a8ff,#00d2fc);
   color: white;
 }
+
+.primary-btn.write-btn{ display:inline-flex; align-items:center; gap:10px; padding:8px 18px; border-radius:999px; font-weight:600 }
+.primary-btn.write-btn .btn-icon{ fill: #fff }
 
 .ghost-btn {
   background: #eef5ff;
@@ -252,13 +288,18 @@ textarea {
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: #2b7fff; /* more visible blue */
   font-weight: 700;
-  margin-right: 16px;
+  margin-right: 28px;
   font-size: 0.95rem;
   border-radius: 8px;
-  background: #eef7ff; /* subtle background to ensure contrast */
-  box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+  /* gradient text instead of background */
+  background-image: linear-gradient(90deg,#00a8ff,#00d2fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  box-shadow: none;
+  /* shift slightly left to sit closer to the cell edge */
+  transform: translateX(-6px);
 }
 
 .post-body {
