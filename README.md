@@ -1,5 +1,29 @@
-# Vue 3 + Vite
+# BusanHub
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## 1. 개요
+- 부산의 모든 정보와 커뮤니티 서비스를 접할 수 있는 프론트엔드 프로젝트
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+<br>
+
+## 2. 기술 스택
+- 프론트엔드 : Vue.js 3 (Vite)
+- 배포 : [Netlify](https://busanhub.netlify.app/)
+
+<br>
+
+## 3. 요구사항
+- 커뮤니티 기능 (localStorage)
+  - CRUD
+  - 검색, 조회수, 북마크, 좋아요 (추가)
+- 챗봇 기능 (OpenAI API)
+
+<br>
+
+## 4. 브랜치 전략
+- master
+  - develop
+    - feat-board
+    - feat-chat
+    - refactor
+    - docs
+    - ...
